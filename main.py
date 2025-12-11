@@ -183,4 +183,27 @@ async def send_notification(deals):
             # Prepend the pagination info to the beginning of the message
             messages_to_send[i] = f"Page {i + 1} of {num_pages} | {msg}"
 
-    # 4. SEND NOTIFICATION (Iterate
+    # 4. SEND NOTIFICATION (Iterate through all generated messages)
+    if BOT_TOKEN and CHAT_ID:
+        try:
+            bot = Bot(token=BOT_TOKEN)
+            for i, msg in enumerate(messages_to_send):
+                # Add a small delay between messages to prevent rate-limiting issues
+                if i > 0:
+                    await asyncio.sleep(1) 
+                
+                await bot.send_message(chat_id=CHAT_ID, text=msg, parse_mode='Markdown')
+        except Exception as e:
+            print(f"Error sending Telegram message: {e}")
+    else:
+        print("Error: BOT_TOKEN or CHAT_ID is missing. Cannot send Telegram message.")
+
+
+if __name__ == "__main__":
+    print("Starting grocery deal tracker...")
+
+    # We need to run the async function using asyncio.run()
+    deals = get_deals()
+    asyncio.run(send_notification(deals))
+
+    print(f"Finished. Found {len(deals)} deals.")
