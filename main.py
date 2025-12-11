@@ -14,7 +14,7 @@ PREFERRED_STORES = [
     'No Frills',
     'Loblaws',
     'T&T Supermarket',
-    "Longos",
+    "Longo's",
     'Walmart'
 ]
 
@@ -30,8 +30,8 @@ DEALS_OF_INTEREST = [
     'lactose free', 'Naturalia', 'gay lee', 'sour cream', 'butter sticks', 'milk', 'purfiltre'
 ]
 
-# Cap the total number of deals to send to prevent the Telegram message size error
-MAX_DEALS_TO_SEND = 200
+# Telegram's limit is 4096 characters. We use 3500 to leave a buffer for Markdown and headers.
+TELEGRAM_MESSAGE_LIMIT = 3500
 
 # Read secrets from GitHub Actions environment variables (Use the GitHub Secrets setup)
 BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN_FOR_LOCAL_TESTING') 
@@ -115,55 +115,72 @@ def get_deals():
 
 
 async def send_notification(deals):
-    """Formats and sends the deals list via Telegram, truncating if necessary."""
+    """Formats the deals list and sends it via Telegram, using pagination for long lists."""
     
-    # Use only the first MAX_DEALS_TO_SEND items
-    deals_to_send = deals[:MAX_DEALS_TO_SEND]
-    
-    if not deals_to_send:
+    if not deals:
         message = "No new deals found for your interests this week!"
+        messages_to_send = [message]
     else:
-        # Group deals by store
+        # Group all deals by store
         stores = {}
-        for deal in deals_to_send:
+        for deal in deals:
             store = deal['store']
             if store not in stores:
                 stores[store] = []
             stores[store].append(deal)
 
-        # Format the final message
-        message = f"🛒 **Weekly Grocery Deals Alert!** 🛒\n\n"
+        # --- Build Message Pages ---
+        messages_to_send = []
+        current_message = "" 
         
-        # Add a note if the deal list was truncated
-        if len(deals) > MAX_DEALS_TO_SEND:
-             message += f"**NOTE:** Found {len(deals)} total deals. Showing the first {MAX_DEALS_TO_SEND} from preferred stores.\n\n"
-        
+        # Iterate through stores and build the message page by page
         for store, store_deals in stores.items():
-            message += f"--- 🏢 **{store}** ({len(store_deals)} deals) ---\n"
+            store_header = f"--- 🏢 **{store}** ({len(store_deals)} deals) ---\n"
+            
+            # If the current page is empty, start it with the primary header
+            if not current_message.strip():
+                 current_message = "🛒 **Weekly Grocery Deals Alert!** 🛒\n\n"
+                 current_message += f"**Total Deals Found:** {len(deals)}\n"
+                 current_message += "\n"
+
+            # Check if adding the new store header will cause an overflow
+            if len(current_message) + len(store_header) > TELEGRAM_MESSAGE_LIMIT:
+                # Finalize the current message and start a new page
+                current_message += "\n(Message too long, continued below...)"
+                messages_to_send.append(current_message)
+                current_message = f"🛒 **Weekly Grocery Deals Alert! (Cont.)** 🛒\n\n"
+            
+            current_message += store_header
+
             for deal in store_deals:
                 product = deal['product']
                 price = f"${deal['price']}" if isinstance(deal['price'], (int, float)) else deal['price']
                 discount = deal['discount']
+                
+                deal_line = f"   • {product}: **{price}** ({discount})\n"
+                
+                # Check if adding the next deal line exceeds the limit
+                if len(current_message) + len(deal_line) > TELEGRAM_MESSAGE_LIMIT:
+                    # Finalize the current message and start a new page
+                    current_message += "\n(Message too long, continued below...)"
+                    messages_to_send.append(current_message)
+                    
+                    # Start new page, re-adding the main and store headers
+                    current_message = f"🛒 **Weekly Grocery Deals Alert! (Cont.)** 🛒\n\n"
+                    current_message += store_header 
 
-                message += f"   • {product}: **{price}** ({discount})\n"
-            message += "\n"
+                current_message += deal_line
+            
+            current_message += "\n" # Add a space between stores
 
-    # 4. SEND NOTIFICATION
-    if BOT_TOKEN and CHAT_ID:
-        try:
-            bot = Bot(token=BOT_TOKEN)
-            await bot.send_message(chat_id=CHAT_ID, text=message, parse_mode='Markdown')
-        except Exception as e:
-            print(f"Error sending Telegram message: {e}")
-    else:
-        print("Error: BOT_TOKEN or CHAT_ID is missing. Cannot send Telegram message.")
+        # Add the last partially filled message
+        if current_message.strip():
+            messages_to_send.append(current_message)
 
+        # Update the header in all messages with the final page count
+        num_pages = len(messages_to_send)
+        for i, msg in enumerate(messages_to_send):
+            # Prepend the pagination info to the beginning of the message
+            messages_to_send[i] = f"Page {i + 1} of {num_pages} | {msg}"
 
-if __name__ == "__main__":
-    print("Starting grocery deal tracker...")
-
-    # We need to run the async function using asyncio.run()
-    deals = get_deals()
-    asyncio.run(send_notification(deals))
-
-    print(f"Finished. Found {len(deals)} deals.")
+    # 4. SEND NOTIFICATION (Iterate
