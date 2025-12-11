@@ -21,13 +21,13 @@ PREFERRED_STORES = [
 # The list of keywords your script will search for. 
 DEALS_OF_INTEREST = [
     # Meat/Protein
-    'chicken', 'pork', 'beef', 'steak', 'sausage', 'salmon', 'tuna', 'veal', 'ground', 'turkey', 'lamb',
+    'chicken breast', 'pork', 'beef', 'steak', 'sausage', 'salmon', 'tuna', 'veal', 'turkey', 'lamb',
     # Produce
     'apple', 'pear', 'banana', 'clementine', 'broccoli', 'carrot', 'lettuce', 'cucumbers', 'tomato', 'persimon', 'kiwi',
     # Snacks/Packaged Goods
-    'cookie', 'cracker', 'granola', 'chip', 'yogurt', 'cereal', 'ahoy', 'cakester', 'oreo',
+    'ahoy', 'cakester', 'oreo', 'yoplait'
     # Dairy
-    'lactose free', 'Naturalia', 'gay lee', 'sour cream', 'butter sticks', 'milk', 'purfiltre'
+    'lactose free', 'Natrel', 'gay lee', 'sour cream', 'butter sticks', 'LACTANTIA purfiltre'
 ]
 
 # Telegram's limit is 4096 characters. We use 3500 to leave a buffer for Markdown and headers.
@@ -207,3 +207,4 @@ if __name__ == "__main__":
     asyncio.run(send_notification(deals))
 
     print(f"Finished. Found {len(deals)} deals.")
+
