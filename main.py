@@ -9,7 +9,7 @@ DEALS_OF_INTEREST = ['meat', 'apple', 'snack'] # e.g., ['chicken breast', 'banan
 
 # Read secrets from GitHub Actions environment variables
 BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN_FOR_LOCAL_TESTING') # Replace placeholder if testing locally
-CHAT_ID = os.environ.get('39354851', 'YOUR_CHAT_ID')   # Replace placeholder if testing locally
+CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', 'YOUR_CHAT_ID')   # Replace placeholder if testing locally
 
 # Flipp's unofficial API endpoint - retrieves raw deal data
 FLIPP_API_URL = f"https://backflipp.wishabi.com/flipp/items/search?locale=en-ca&postal_code={POSTAL_CODE}"
@@ -99,3 +99,4 @@ if __name__ == "__main__":
 
 
     print(f"Finished. Found {len(deals)} deals.")
+
