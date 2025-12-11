@@ -1,0 +1,32 @@
+name: Weekly Grocery Deal Scraper
+
+on:
+  schedule:
+    # Runs every Friday at 8:00 AM UTC (adjust cron for your local time - e.g., '0 13 * * 5' for 8 AM EST)
+    # Visit crontab.guru to adjust the time/day: minute hour day-of-month month day-of-week
+    - cron: '0 8 * * 5' 
+  # Allows manual trigger from the GitHub Actions tab
+  workflow_dispatch: 
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' # Use a modern Python version
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Execute Python script
+      env:
+        # Passes your secret keys to the script securely
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: python main.py
