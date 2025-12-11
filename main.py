@@ -21,7 +21,6 @@ DEALS_OF_INTEREST = [
 ]
 
 # Read secrets from GitHub Actions environment variables (Use the GitHub Secrets setup)
-# Only replace 'YOUR_TOKEN_FOR_LOCAL_TESTING' if you run this script outside of GitHub Actions.
 BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN_FOR_LOCAL_TESTING') 
 CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', 'YOUR_CHAT_ID_FOR_LOCAL_TESTING')
 
@@ -58,8 +57,10 @@ def get_deals():
                     continue 
 
                 store_name = item.get('merchant_name', 'Unknown Store')
-                item_name = item.get('flyer_item_description', '').lower()
-                product_name = item.get('name', '').lower()
+                
+                # FIX APPLIED HERE: Use or '' and str() to handle NoneType values gracefully
+                item_name = str(item.get('flyer_item_description') or '').lower()
+                product_name = str(item.get('name') or '').lower()
                 
                 # Check if the deal matches the current search keyword (necessary for data integrity)
                 is_match = False
