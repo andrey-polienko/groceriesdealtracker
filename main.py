@@ -8,7 +8,7 @@ POSTAL_CODE = 'M2N 7J6'  # e.g., 'M5V 2L9'
 DEALS_OF_INTEREST = ['meat', 'apple', 'snack'] # e.g., ['chicken breast', 'banana', 'cookies']
 
 # Read secrets from GitHub Actions environment variables
-BOT_TOKEN = os.environ.get('8505616872:AAFnF4lVsaoFWujrY2UmGdW2sZCMvThBenU', 'YOUR_BOT_TOKEN') # Replace placeholder if testing locally
+BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN_FOR_LOCAL_TESTING') # Replace placeholder if testing locally
 CHAT_ID = os.environ.get('39354851', 'YOUR_CHAT_ID')   # Replace placeholder if testing locally
 
 # Flipp's unofficial API endpoint - retrieves raw deal data
@@ -96,5 +96,6 @@ if __name__ == "__main__":
     # We need to run the async function using asyncio.run()
     deals = get_deals()
     asyncio.run(send_notification(deals))
+
 
     print(f"Finished. Found {len(deals)} deals.")
