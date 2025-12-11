@@ -33,7 +33,7 @@ def get_deals():
         data = response.json()
 
         # 3. PROCESS AND FILTER DEALS
-            found_deals = []
+    found_deals = []
             for item in data.get('items', []):
                 # Check both the 'name' and the full description
                 item_name = item.get('flyer_item_description', '').lower()
@@ -111,5 +111,6 @@ if __name__ == "__main__":
 
 
     print(f"Finished. Found {len(deals)} deals.")
+
 
 
