@@ -4,21 +4,21 @@ from telegram import Bot
 import asyncio
 
 # *** 1. CONFIGURATION (MUST CHANGE THESE) ***
-POSTAL_CODE = 'M2N 7J6'  # e.g., 'M5V 2L9'
+POSTAL_CODE = 'M2N 7J6' 
 DEALS_OF_INTEREST = [
     # Meat/Protein
-    'chicken', 'pork', 'beef', 'steak', 'sausage', 'salmon', 'tuna', 'veal', 'ground', 'turkey', 'lamb'
+    'chicken', 'pork', 'beef', 'steak', 'sausage', 'salmon', 'tuna', 'veal', 'ground', 'turkey', 'lamb', # <-- COMMA ADDED HERE
     # Produce
-    'apple', 'pear', 'banana', 'clementine', 'broccoli', 'carrot', 'lettuce', 'cucumbers', 'tomato', 'persimon', 'kiwi'
+    'apple', 'pear', 'banana', 'clementine', 'broccoli', 'carrot', 'lettuce', 'cucumbers', 'tomato', 'persimon', 'kiwi', # <-- COMMA ADDED HERE
     # Snacks/Packaged Goods
-    'cookie', 'cracker', 'granola', 'chip', 'yogurt', 'cereal', 'ahoy', 'cakester', 'oreo'
+    'cookie', 'cracker', 'granola', 'chip', 'yogurt', 'cereal', 'ahoy', 'cakester', 'oreo', # <-- COMMA ADDED HERE
     # Dairy
     'lactose free', 'Naturalia', 'gay lee', 'sour cream', 'butter sticks', 'milk', 'pirfiltre'
 ]
 
 # Read secrets from GitHub Actions environment variables
-BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN_FOR_LOCAL_TESTING') # Replace placeholder if testing locally
-CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', 'YOUR_CHAT_ID')   # Replace placeholder if testing locally
+BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN_FOR_LOCAL_TESTING')
+CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', 'YOUR_CHAT_ID')
 
 # Flipp's unofficial API endpoint - retrieves raw deal data
 FLIPP_API_URL = f"https://backflipp.wishabi.com/flipp/items/search?locale=en-ca&postal_code={POSTAL_CODE}"
@@ -33,20 +33,20 @@ def get_deals():
         data = response.json()
 
         # 3. PROCESS AND FILTER DEALS
-    found_deals = []
-            for item in data.get('items', []):
-                # Check both the 'name' and the full description
-                item_name = item.get('flyer_item_description', '').lower()
-                product_name = item.get('name', '').lower() # ADDED THIS LINE
-                store_name = item.get('merchant_name', 'Unknown Store')
-                
-                # Check if the deal matches any of your keywords
-                is_match = False
-                for keyword in DEALS_OF_INTEREST:
-                    # Check keyword in EITHER the description OR the name
-                    if keyword.lower() in item_name or keyword.lower() in product_name: # MODIFIED THIS LINE
-                        is_match = True
-                        break
+        found_deals = []
+        for item in data.get('items', []):
+            # Check both the 'name' and the full description
+            item_name = item.get('flyer_item_description', '').lower()
+            product_name = item.get('name', '').lower()
+            store_name = item.get('merchant_name', 'Unknown Store')
+            
+            # Check if the deal matches any of your keywords
+            is_match = False
+            for keyword in DEALS_OF_INTEREST:
+                # Check keyword in EITHER the description OR the name
+                if keyword.lower() in item_name or keyword.lower() in product_name:
+                    is_match = True
+                    break
 
             if is_match:
                 price = item.get('current_price', 'Price Not Listed')
@@ -111,6 +111,3 @@ if __name__ == "__main__":
 
 
     print(f"Finished. Found {len(deals)} deals.")
-
-
-
