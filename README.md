@@ -136,3 +136,5 @@ telegram.error.InvalidToken: Your TELEGRAM_BOT_TOKEN secret is copied incorrectl
 Text is too long: This error is now bypassed automatically thanks to the built-in pagination limits (TELEGRAM_MESSAGE_LIMIT = 3500), which cleanly divides large datasets into manageable pages.
 
 AttributeError / NoneType: The defensive wrapper str(item.get(...) or '') handles cases where flyer items contain blank/null values natively without crashing.
+
+the end
